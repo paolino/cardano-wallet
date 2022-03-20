@@ -3456,7 +3456,7 @@ unit_makeChangeForCoin =
           )
 
         , ( Coin <$> 1 :| [2, 3], Coin 5
-          , Coin <$> 1 :| [2, 2]
+          , Coin <$> 0 :| [2, 3]
           )
         ]
 
