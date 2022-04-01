@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 -- |
 -- Copyright: © 2018-2021 IOHK
@@ -79,6 +82,12 @@ module Cardano.Wallet.Primitive.Types.UTxOIndex.Internal
     -- Internal Interface
     ----------------------------------------------------------------------------
 
+    -- * Assets
+    , Asset (..)
+    , tokenBundleAssets
+    , tokenBundleAssetCount
+    , tokenBundleHasAsset
+
     -- * Utilities
     , selectRandomSetMember
 
@@ -123,6 +132,7 @@ import GHC.Generics
     ( Generic )
 
 import qualified Cardano.Wallet.Primitive.Types.TokenBundle as TokenBundle
+import qualified Cardano.Wallet.Primitive.Types.TokenMap as TokenMap
 import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
@@ -440,6 +450,35 @@ selectRandomWithPriority i =
 --------------------------------------------------------------------------------
 -- Internal Interface
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-- Assets
+--------------------------------------------------------------------------------
+
+-- TODO: ADP-1449
+-- Remove this type and replace it with a type parameter.
+--
+data Asset
+    = AssetLovelace
+    | Asset AssetId
+    deriving (Eq, Generic, Ord, Read, Show)
+
+deriving instance NFData Asset
+
+tokenBundleAssets :: TokenBundle -> Set Asset
+tokenBundleAssets b = Set.union
+    (Set.fromList [AssetLovelace | TokenBundle.coin b /= mempty])
+    (Set.map Asset (TokenBundle.getAssets b))
+
+tokenBundleAssetCount :: TokenBundle -> Int
+tokenBundleAssetCount b = (+)
+    (if TokenBundle.coin b /= mempty then 1 else 0)
+    (TokenMap.size (TokenBundle.tokens b))
+
+tokenBundleHasAsset :: TokenBundle -> Asset -> Bool
+tokenBundleHasAsset b = \case
+    AssetLovelace -> TokenBundle.coin b /= mempty
+    Asset assetId -> TokenBundle.hasQuantity b assetId
 
 --------------------------------------------------------------------------------
 -- Utilities
