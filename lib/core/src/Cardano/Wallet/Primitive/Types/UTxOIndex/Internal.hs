@@ -320,13 +320,13 @@ delete u i =
         & case categorizeTokenBundleNew b of
             BundleWithNoAssets -> id
             BundleWithOneAsset a -> id
-                . over #indexSingletons (`deleteEntry` a)
                 . over #indexAll (`deleteEntry` a)
+                . over #indexSingletons (`deleteEntry` a)
             BundleWithTwoAssets (a1, a2) -> id
-                . over #indexPairs (`deleteEntry` a1)
-                . over #indexPairs (`deleteEntry` a2)
                 . over #indexAll (`deleteEntry` a1)
                 . over #indexAll (`deleteEntry` a2)
+                . over #indexPairs (`deleteEntry` a1)
+                . over #indexPairs (`deleteEntry` a2)
             BundleWithMultipleAssets as -> id
                 . over #indexAll (flip (F.foldl' deleteEntry) as)
 
