@@ -18,6 +18,10 @@ module Cardano.Wallet.CoinSelection.Internal.Context
 
 import Prelude
 
+import Cardano.Wallet.Primitive.Types.TokenBundle
+    ( TokenBundle )
+import Data.Set
+    ( Set )
 import Fmt
     ( Buildable )
 
@@ -37,8 +41,20 @@ class
     -- | A target address to which payments can be made.
     type Address c
 
+    -- | A unique identifier for an asset.
+    type Asset c
+
     -- | A unique identifier for an individual UTxO.
     type UTxO c
 
     -- | Generates a dummy address value.
     dummyAddress :: Address c
+
+    -- | Returns the set of assets held in a token bundle.
+    tokenBundleAssets :: TokenBundle -> Set (Asset c)
+
+    -- | Returns a count of the number of assets held in a token bundle.
+    tokenBundleAssetCount :: TokenBundle -> Int
+
+    -- | Indicates whether the given token bundle has the given asset.
+    tokenBundleHasAsset :: TokenBundle -> Asset c -> Bool

@@ -1,11 +1,8 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {- HLINT ignore "Use &&" -}
 
 -- |
@@ -460,35 +457,6 @@ selectRandomWithPriority i =
 --------------------------------------------------------------------------------
 -- Internal Interface
 --------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
--- Assets
---------------------------------------------------------------------------------
-
--- TODO: ADP-1449
--- Remove this type and replace it with a type parameter.
---
-data Asset
-    = AssetLovelace
-    | Asset AssetId
-    deriving (Eq, Generic, Ord, Read, Show)
-
-deriving instance NFData Asset
-
-tokenBundleAssets :: TokenBundle -> Set Asset
-tokenBundleAssets b = Set.union
-    (Set.fromList [AssetLovelace | TokenBundle.coin b /= mempty])
-    (Set.map Asset (TokenBundle.getAssets b))
-
-tokenBundleAssetCount :: TokenBundle -> Int
-tokenBundleAssetCount b = (+)
-    (if TokenBundle.coin b /= mempty then 1 else 0)
-    (TokenMap.size (TokenBundle.tokens b))
-
-tokenBundleHasAsset :: TokenBundle -> Asset -> Bool
-tokenBundleHasAsset b = \case
-    AssetLovelace -> TokenBundle.coin b /= mempty
-    Asset assetId -> TokenBundle.hasQuantity b assetId
 
 --------------------------------------------------------------------------------
 -- Utilities

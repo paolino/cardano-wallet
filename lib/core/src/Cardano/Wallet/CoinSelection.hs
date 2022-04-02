@@ -1,9 +1,12 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedLabels #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -115,6 +118,8 @@ import Cardano.Wallet.Primitive.Types.UTxOSelection
     ( UTxOSelection )
 import Control.Arrow
     ( (&&&) )
+import Control.DeepSeq
+    ( NFData )
 import Control.Monad.Random.Class
     ( MonadRandom (..) )
 import Control.Monad.Trans.Except
@@ -155,9 +160,36 @@ data WalletSelectionContext
 
 instance SC.SelectionContext WalletSelectionContext where
     type Address WalletSelectionContext = Address
+    type Asset WalletSelectionContext = WalletAsset
     type UTxO WalletSelectionContext = WalletUTxO
 
     dummyAddress = Address ""
+
+    tokenBundleAssets :: TokenBundle -> Set Asset
+    tokenBundleAssets b = Set.union
+        (Set.fromList [AssetLovelace | TokenBundle.coin b /= mempty])
+        (Set.map Asset (TokenBundle.getAssets b))
+
+    tokenBundleAssetCount :: TokenBundle -> Int
+    tokenBundleAssetCount b = (+)
+        (if TokenBundle.coin b /= mempty then 1 else 0)
+        (TokenMap.size (TokenBundle.tokens b))
+
+    tokenBundleHasAsset :: TokenBundle -> Asset -> Bool
+    tokenBundleHasAsset b = \case
+        AssetLovelace -> TokenBundle.coin b /= mempty
+        Asset assetId -> TokenBundle.hasQuantity b assetId
+
+--------------------------------------------------------------------------------
+-- Mapping between external (wallet) and internal asset identifiers
+--------------------------------------------------------------------------------
+
+data WalletAsset
+    = AssetLovelace
+    | Asset AssetId
+    deriving (Eq, Generic, Ord, Read, Show)
+
+deriving instance NFData WalletAsset
 
 --------------------------------------------------------------------------------
 -- Mapping between external (wallet) and internal UTxO identifiers
