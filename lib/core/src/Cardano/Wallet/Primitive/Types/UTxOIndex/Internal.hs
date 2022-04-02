@@ -735,14 +735,14 @@ indexIsComplete i =
         BundleWithNoAssets ->
             True
         BundleWithOneAsset a -> and
-            [ hasEntryForAsset a u indexSingletons
-            , hasEntryForAsset a u indexAll
+            [ hasEntryForAsset a u indexAll
+            , hasEntryForAsset a u indexSingletons
             ]
         BundleWithTwoAssets (a1, a2) -> and
-            [ hasEntryForAsset a1 u indexPairs
-            , hasEntryForAsset a2 u indexPairs
-            , hasEntryForAsset a1 u indexAll
+            [ hasEntryForAsset a1 u indexAll
             , hasEntryForAsset a2 u indexAll
+            , hasEntryForAsset a1 u indexPairs
+            , hasEntryForAsset a2 u indexPairs
             ]
         BundleWithMultipleAssets as ->
             F.all (\a -> hasEntryForAsset a u indexAll) as
