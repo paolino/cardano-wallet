@@ -604,13 +604,13 @@ insertUnsafe u b i = i
     & case categorizeTokenBundleNew b of
         BundleWithNoAssets -> id
         BundleWithOneAsset a -> id
-            . over #indexSingletons (`insertEntry` a)
             . over #indexAll (`insertEntry` a)
+            . over #indexSingletons (`insertEntry` a)
         BundleWithTwoAssets (a1, a2) -> id
-            . over #indexPairs (`insertEntry` a1)
-            . over #indexPairs (`insertEntry` a2)
             . over #indexAll (`insertEntry` a1)
             . over #indexAll (`insertEntry` a2)
+            . over #indexPairs (`insertEntry` a1)
+            . over #indexPairs (`insertEntry` a2)
         BundleWithMultipleAssets as -> id
             . over #indexAll (flip (F.foldl' insertEntry) as)
   where
