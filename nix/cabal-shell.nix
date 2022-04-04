@@ -30,6 +30,8 @@ mkShell rec {
     nixWrapped
     pkgconfig
     gnutar
+    haskell-build-tools.hie-bios
+    haskell-build-tools.haskell-language-server
   ]
   ++ lib.optional (!stdenv.isDarwin) git
   ++ (with haskellProject.hsPkgs; [
